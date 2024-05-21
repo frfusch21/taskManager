@@ -37,7 +37,6 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        // Other route groups can be defined here
     }
 
     /**

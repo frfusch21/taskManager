@@ -41,34 +41,36 @@
     </div>
 </body>
 <script>
-function login() {
-    const email = document.querySelector('#email').value;
-    const password = document.querySelector('#password').value;
+    function login() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const email = document.querySelector('#email').value;
+        const password = document.querySelector('#password').value;
 
-    fetch('/api/login-form', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    }).then(data => {
-        if (data.access_token) {
-            localStorage.setItem('token', data.access_token);
-            alert('Login successful');
-            window.location.href = '/tasks';
-        } else {
-            alert('Login failed');
-        }
-    }).catch(error => {
-        console.error('Login error:', error);
-        alert('Login error');
-    });
-}
+        fetch('/api/login-form', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        }).then(data => {
+            if (data.access_token) {
+                localStorage.setItem('token', data.access_token);
+                alert('Login successful');
+                window.location.href = '/tasks';
+            } else {
+                alert('Login failed');
+            }
+        }).catch(error => {
+            console.error('Login error:', error);
+            alert('Login error');
+        });
+    }
 </script>
 </html>

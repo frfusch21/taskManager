@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Log;
 
 class Authenticate
 {
@@ -15,12 +16,29 @@ class Authenticate
      * @param  string|null  $guard
      * @return mixed
      */
+
     public function handle($request, Closure $next, $guard = null)
     {
-        if (Auth::guard($guard)->guest()) {
+        Log::info('Authenticating request', [
+            'guard' => $guard,
+            'is_guest' => Auth::guard($guard)->guest(),
+            'user' => Auth::guard($guard)->user(),
+            'token' => $request->bearerToken(),
+            'check' => Auth::check(),
+        ]);
+
+        if (Auth::check()) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response('Unauthorized.', 401);
+                Log::warning('Unauthorized via API request', [
+                    'guard' => $guard,
+                    'request' => $request->all(),
+                ]);
+                return response()->json(['message' => 'Unauthorized'], 401);
             } else {
+                Log::warning('Unauthorized login via web request', [
+                    'guard' => $guard,
+                    'request' => $request->all(),
+                ]);
                 return redirect()->guest('login');
             }
         }

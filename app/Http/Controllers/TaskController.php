@@ -5,17 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 Use App\Models\Task;
 use Illuminate\Support\Facades\Auth;
-
+use Log;
 
 class TaskController extends Controller
 {
     
     public function index()
     {
-        if (Auth::check()) {
+        $user = Auth::user();
+        Log::info($user);
+        if ($user) {
             $tasks = Task::where('owner', $user->name)->get();
-
-            return view('tasks.index', compact('tasks'));
+            return view('welcome', compact('tasks','user'));
         } else {
             return redirect()->route('login')->with('error', 'You need to log in first.');
         }
@@ -41,13 +42,23 @@ class TaskController extends Controller
 
     public function update(Task $task)
     {
-        $task->update(['isDone' => true]);
-        return response()->json(['message' => 'Task updated', 'task' => $task]);
+        try {
+            $task->update(['isDone' => true]);
+            return response()->json(['message' => 'Task updated', 'task' => $task]);
+        } catch (\Exception $e) {
+            \Log::error('Error Updating Task:', ['message' => $e->getMessage()]);
+            return response()->json(['error' => 'Task update failed'], 500);
+        }
     }
 
     public function destroy(Task $task)
     {
-        $task->delete();
-        return response()->json(['message' => 'Task deleted']);
+        try {
+            $task->delete();
+            return response()->json(['message' => 'Task deleted']);
+        } catch (\Exception $e) {
+            \Log::error('Error Deleting Task:', ['message' => $e->getMessage()]);
+            return response()->json(['error' => 'Task delete failed'], 500);
+        }
     }
 }

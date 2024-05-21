@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 Use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Log;
+
 
 class AuthController extends Controller
 {
@@ -41,17 +43,24 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        Log::info('Login method hit');
+
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string',
+            'password' => 'required',
         ]);
+        Log::info('Email: ' . $request->email);
+        
+        $user = User::where('email', $request->email)->first();
 
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+        if ($user && Hash::check($request->password, $user->password)) {
             $tokenResult = $user->createToken('Personal Access Token');
             $token = $tokenResult->accessToken;
+
+            Log::info('User authenticated successfully.');
+            Log::info('Token', [
+                'access_token' => $token,
+            ]);
 
             return response()->json([
                 'access_token' => $token,
@@ -59,6 +68,7 @@ class AuthController extends Controller
                 'expires_at' => Carbon::parse($tokenResult->token->expires_at)->toDateTimeString()
             ], 200);
         } else {
+            Log::warning('Unauthorized login attempt with credentials:', $request->only('email', 'password'));
             return response()->json(['message' => 'Unauthorized'], 401);
         }
     }
