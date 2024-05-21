@@ -8,7 +8,13 @@
     <link href="https://unpkg.com/tailwindcss@2.0.1/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
-    <div class="min-h-screen flex items-center justify-center">
+    <div style="min-height:20vh;" class="flex items-center justify-center">
+        <h1 class="font-bold text-5xl text-center mb-2 pt-4">Task Manager</h1>
+    </div>
+    <div class="flex items-center justify-center">
+        <h3 class="font-bold text-center mb-2">by Farah Yulianti</h3>
+    </div>
+    <div style="min-height:90vh;" class="flex items-center justify-center">
         <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
             <h2 class="text-2xl font-bold mb-6">Register</h2>
             @if (session('error'))
